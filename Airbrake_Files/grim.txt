@@ -1,0 +1,154 @@
+//code
+#define MPU6050_ACCEL_FS_16G 2
+#define SEALEVELPRESSURE_HPA (1013.25)//keep?? for mow 
+#include <Wire.h>
+#include <SP I.h> // for spi
+#include <SD.h>
+#include <Adafruit_Sensor.h>
+#include "Adafruit_BMP3XX.h"
+#include <I2Cdev.h>
+#include <MPU6050.h>
+//#include <Servo.h> no longer using servo librar
+//#define BMP_SCK 13//stuff for bmp spi
+//#define BMP_MISO 12
+//#define BMP_MOSI 11
+//#define BMP_CS 10
+unsigned long tiime;
+unsigned long launchtime;
+float Launchalt;
+int accel;
+int accel_offset_raw =0 ;
+int launchstatus = 0;
+float altm;
+double altcm;
+int servopwm;
+const int servoinpwm = 2200;
+int servodeg;
+int scale = 4096;//imu accel scale
+Adafruit_BMP3XX bmp;
+MPU6050 mpu; 
+int deploy = 2; //0 for full, 1 for partial, 2+ for in 
+
+File myFile ;
+
+void setup() {
+  Serial.begin(115200);
+  while (!Serial);
+  Serial.println("insert code description");
+  Wire.begin();
+  
+Serial.print("Initializing SD card...");
+  if (!SD.begin(4)) {
+    Serial.println("initialization failed!");
+    while (1);
+  }
+  Serial.println("initialization done.");
+  
+  mpu.initialize();
+  mpu.setFullScaleAccelRange(MPU6050_ACCEL_FS_16G);
+  pinMode(8,OUTPUT);//ledpin
+  pinMode(9,OUTPUT);
+  digitalWrite(9,LOW);
+  digitalWrite(8,LOW);
+  if (!bmp.begin_I2C()) {   // hardware I2C mode, can pass in address & alt Wire
+  //if (! bmp.begin_SPI(BMP_CS)) {  // hardware SPI mode  
+  //if (! bmp.begin_SPI(BMP_CS, BMP_SCK, BMP_MISO, BMP_MOSI)) {  // software SPI mode
+    Serial.println("Could not find a valid BMP3 sensor, check wiring!");
+    while (1);
+  }
+
+  // Set up oversampling and filter initialization
+ // bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
+  bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
+  bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
+  bmp.setOutputDataRate(BMP3_ODR_50_HZ);
+  bmp.readAltitude(SEALEVELPRESSURE_HPA);
+  delay(2000); // bjorn does this wait for some kind of pressure sensor init? pls comment magic number stuff// no 
+  Launchalt = bmp.readAltitude(SEALEVELPRESSURE_HPA);
+  Serial.println(Launchalt);
+  // also, is this LED just for confirming setup worked? no its a pulse for oscope
+  digitalWrite(8,HIGH);
+  delay(500);
+  digitalWrite(8,LOW);
+   myFile = SD.open("test.txt", FILE_WRITE);
+  // if the file opened okay, write to it:
+  if (myFile) {
+    Serial.print("Writing to test.txt...");
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening test.txt");
+  }
+  myFile.print("opened");
+}
+ 
+ 
+ 
+void loop() {
+  digitalWrite(8,LOW);//pulse
+  myFile = SD.open("test.txt", FILE_WRITE);
+  // read acceleration values from the IMU
+  int16_t ax, ay, az;
+  mpu.getAcceleration(&ax, &ay, &az);
+  
+
+
+ // myFile.println("");
+ // myFile.print("acceleration z");
+ // myFile.println((float) ax / scale);
+
+  if (! bmp.performReading()) { //get bmp reading
+    Serial.println("Failed to perform reading :(");
+    return; 
+  }
+  
+  altm = bmp.readAltitude(SEALEVELPRESSURE_HPA)-Launchalt; //works!?! yes
+  altcm = altm*100;  //BROKEN DO NOT use- not anymore?
+  
+if((float)ax/scale > 2 && launchstatus == 0){
+  launchstatus = 1;
+  launchtime = micros();
+}
+
+Serial.println((float)ax/scale);
+Serial.println(launchstatus);
+
+if(launchstatus == 1 && tiime < 1000){
+   tiime = (micros()-launchtime)/10000;
+  myFile.println();
+  myFile.print(tiime);
+  myFile.print("  ");
+Serial.println(tiime);
+  myFile.print(bmp.pressure / 100.0);
+  myFile.print("  ");
+  
+  myFile.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
+  myFile.print("  ");
+  
+  myFile.print(altm);
+  myFile.print("  ");
+  
+    if (tiime>199){
+      servodeg = 200;
+      servopwm = 800;
+      digitalWrite(9,HIGH);
+      delayMicroseconds(servopwm);
+      digitalWrite(9,LOW);
+      deploy = 0;
+    }
+  
+  
+}
+  else if (tiime >= 1000){
+    launchstatus = 0;
+    tiime=0;
+    servopwm = servoinpwm;
+      if(deploy<30){
+      digitalWrite(9,HIGH);
+      delayMicroseconds(servopwm);
+      digitalWrite(9,LOW);
+      deploy ++;
+      }
+    
+  }
+    myFile.close();
+}
