@@ -22,9 +22,9 @@
 unsigned long int launchTime;
 unsigned long int flightTime; // how long in milliseconds have passed since the rocket detected a launch?
 int lastTime = 0; // in milliseconds, what was the flight time recorded in the last data entry?
-int launchAlt; // how high above sea level in meters was the rocket when it was launched?
-int altitude; // in meters above launch altitude
-int lastAltitude = 0; // in meters
+float launchAlt; // how high above sea level in meters was the rocket when it was launched?
+float altitude; // in meters above launch altitude
+float lastAltitude = 0; // in meters
 float velocity = 0; // in m/s
 const int accScale = 4096;
 
@@ -68,7 +68,7 @@ File myFile;
 void setup() { 
     Serial.begin(115200);
     while (!Serial); 
-    Serial.println("Now starting: AC-DC V4\n");
+    Serial.println("Now initializing: AC-DC V4.1\n");
     Wire.begin(); 
     
     Serial.println("Initializing SD card..."); 
@@ -120,7 +120,7 @@ void setup() {
     myFile.close();
     lastAltitude = bmp.readAltitude(SEALEVELPRESSURE_HPA)-launchAlt;
     
-    Serial.println("Beginning loop...");
+    Serial.println("Beginning loop...\n\n");  
 }
  
  
@@ -156,7 +156,7 @@ void loop() {
         // get all relevant launch variables
         flightTime = (micros()-launchTime)/1000; 
         altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA)-launchAlt; 
-        velocity = (altitude - lastAltitude)/(flightTime-lastTime) * 1000; 
+        velocity = (altitude - lastAltitude)/(flightTime-lastTime) / 1000; 
         lastTime = flightTime; 
         lastAltitude = altitude; 
         isBurning = flightTime <= burnout; 
