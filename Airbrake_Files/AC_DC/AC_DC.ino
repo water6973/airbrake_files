@@ -156,7 +156,7 @@ void loop() {
         // get all relevant launch variables
         flightTime = (micros()-launchTime)/1000; 
         altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA)-launchAlt; 
-        velocity = (altitude - lastAltitude)/(flightTime-lastTime) / 1000; 
+        velocity = (static_cast<float>(altitude - lastAltitude) / (static_cast<float>(flightTime - lastTime))) / 1000.0f;
         lastTime = flightTime; 
         lastAltitude = altitude; 
         isBurning = flightTime <= burnout; 
