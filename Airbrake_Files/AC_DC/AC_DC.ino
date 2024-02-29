@@ -20,7 +20,7 @@
 #include <MPU6050.h> 
 
 unsigned long int launchTime;
-unsigned long int flightTime; // how long in milliseconds have passed since the rocket detected a launch?
+int flightTime; // how long in milliseconds have passed since the rocket detected a launch?
 int lastTime = 0; // in milliseconds, what was the flight time recorded in the last data entry?
 float launchAlt; // how high above sea level in meters was the rocket when it was launched?
 float altitude; // in meters above launch altitude
@@ -68,7 +68,7 @@ File myFile;
 void setup() { 
     Serial.begin(115200);
     while (!Serial); 
-    Serial.println("Now initializing: AC-DC V4.1\n");
+    Serial.println("Now starting: AC-DC V4\n");
     Wire.begin(); 
     
     Serial.println("Initializing SD card..."); 
@@ -120,7 +120,7 @@ void setup() {
     myFile.close();
     lastAltitude = bmp.readAltitude(SEALEVELPRESSURE_HPA)-launchAlt;
     
-    Serial.println("Beginning loop...\n\n");  
+    Serial.println("Beginning loop...");
 }
  
  
@@ -146,17 +146,19 @@ void loop() {
     }
 
     // print out data on acceleration and launch status 
+    Serial.print("Flight Time (ms): "); 
+    Serial.print(flightTime);
     Serial.print("Vertical Acceleration (m/s/s): "); 
     Serial.println((float)ax/accScale);
     Serial.print("Launch status: ");
     Serial.println(isLaunched);
-
+    
     // if launch is detected and rocket has been flying for less than 20 seconds
     if((isLaunched && flightTime <= 20000) or debugMode){
         // get all relevant launch variables
         flightTime = (micros()-launchTime)/1000; 
-        altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA)-launchAlt; 
-        velocity = (static_cast<float>(altitude - lastAltitude) / (static_cast<float>(flightTime - lastTime))) / 1000.0f;
+        altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA)-launchAlt;
+        velocity = (static_cast<float>(altitude - lastAltitude) / (static_cast<float>(flightTime - lastTime))) * 1000.0f; 
         lastTime = flightTime; 
         lastAltitude = altitude; 
         isBurning = flightTime <= burnout; 
@@ -167,6 +169,10 @@ void loop() {
         if (meanProjectedApogee > 250){
             isDeployed = true;
         } else { isDeployed = false; }
+        
+        /* CODE TO TEST AIRBRAKE DEPLOYMENT
+        isDeployed = true;
+        */
         
         // record out relevant launch variables to the data file (data.txt)
         myFile.print(flightTime);
@@ -186,6 +192,11 @@ void loop() {
         
         myFile.print(meanProjectedApogee);
         myFile.println();
+        
+        /* CODE TO TEST APOGEE AVERAGING
+        Serial.print(meanProjectedApogee);
+        Serial.print(flightData);
+        */
         
         entry = (entry + 1) % sliceLength;
         numEntries = min(numEntries + 1, sliceLength);
