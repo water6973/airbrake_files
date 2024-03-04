@@ -2,10 +2,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-actual_apogee = 0; # replace with actual apogee of flight in m
+actual_apogee = 233; # replace with actual apogee of flight in m
 
-filename = '/home/gavin/Documents/Airbrake_Files/Flight_Data/Clean_Data/test7.csv'
-graph_filename = '/home/gavin/Documents/Airbrake_Files/Flight_Data/Graphs/test7.png'
+filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test7.csv'
+graph_filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Graphs/test7.png'
 
 df = pd.read_csv(filename, names=['Time', 'Altitude', 'Velocity', 'isDeployed', 'isBurning', 'Projected Apogee'])
 
@@ -18,9 +18,9 @@ plt.figure(figsize=(10, 6))
 plt.plot(df['Time'], df['Altitude'], label='Altitude')
 plt.plot(df['Time'], df['Velocity'], label='Velocity')
 plt.plot(df['Time'], df['Projected Apogee'], label='Projected Apogee')
-plt.plot(df['Time'], df['Error'], label='Error', color='green')
-plt.axhline(y=actual_apogee, color='r', linestyle='-', label='Actual Apogee')
-plt.axvline(x=1500, color='r', linestyle='-', label='Motor Cutoff (1.5s)')
+# plt.plot(df['Time'], df['Error'], label='Error', color='green')
+plt.axhline(y=actual_apogee, color='r', linestyle='--', label='Actual Apogee')
+plt.axvline(x=1500, color='r', linestyle='--', label='Motor Cutoff (1.5s)')
 
 deploy_changes = df[df['isDeployed'].diff() != 0]
 for time in deploy_changes['Time']:
