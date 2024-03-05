@@ -3,29 +3,30 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 actual_apogee = 233  # replace with actual apogee of flight in m
-k = 0.0016
+k = 0.015 # change this (basically adjusting drag coefficient, the higher it is the lower projected apogee will be)
 mass = 0.641
 
 def calculate_projected_apogee(altitude, velocity):
     return altitude + (mass / (2 * k)) * np.log((k * velocity**2) / (mass * 9.8) + 1)
 
-filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test7.csv'
-graph_filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Graphs/test7.png'
+filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test7.csv' # change this to be compatible with your own system
+graph_filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Graphs/test7.png' # this too
 
 df = pd.read_csv(filename, names=['Time', 'Altitude', 'Velocity', 'isDeployed', 'isBurning', 'Projected Apogee'])
 
 df.loc[df['Time'] <= 1.5, 'Velocity'] = np.nan
 df['Error'] = abs(actual_apogee - calculate_projected_apogee(df['Altitude'], df['Velocity']))
 
-# Add Adjusted Velocity column
-df['Adjusted Velocity'] = df['Velocity'].copy()  # Initialize with original velocity
+df['Adjusted Velocity'] = df['Velocity'].copy() 
 for i in range(1, len(df)):
-    prev_velocity = df.at[i - 1, 'Adjusted Velocity']
-    current_velocity = df.at[i, 'Velocity']
-    if current_velocity > prev_velocity:
-        df.at[i, 'Adjusted Velocity'] = min(prev_velocity + 1, current_velocity)
-    elif current_velocity < prev_velocity:
-        df.at[i, 'Adjusted Velocity'] = max(prev_velocity - 1, current_velocity)
+    if (df.at[i, 'Time'] > 2000 and df.at[i, 'Time'] < 4500): # change these values (sets the interval of time where velocity change clamp is applied)
+        prev_velocity = df.at[i - 1, 'Adjusted Velocity']
+        current_velocity = df.at[i, 'Velocity']
+        if current_velocity > prev_velocity:
+            df.at[i, 'Adjusted Velocity'] = min(prev_velocity + 5, current_velocity) # sets velocity change clamp in the positive direction
+        elif current_velocity < prev_velocity:
+            df.at[i, 'Adjusted Velocity'] = max(prev_velocity - 5, current_velocity) # sets velocity change clamp in the negative direction
+
 
 # Calculate projected apogee using the provided equation
 df['Projected Apogee'] = calculate_projected_apogee(df['Altitude'], df['Adjusted Velocity'])
