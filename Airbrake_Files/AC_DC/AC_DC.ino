@@ -26,6 +26,7 @@ float launchAlt; // how high above sea level in meters was the rocket when it wa
 float altitude; // in meters above launch altitude
 float lastAltitude = 0; // in meters
 float velocity = 0; // in m/s
+float cappedVelocity = 0; // in m/s
 const int accScale = 4096;
 
 const int burnout = 1500; // in milliseconds, how long the motor will burn for
@@ -68,7 +69,7 @@ File myFile;
 void setup() {
     Serial.begin(115200);
     while (!Serial);
-    Serial.println("Now starting: AC-DC V5\n");
+    Serial.println("Now starting: AC-DC V5.1\n");
     Wire.begin();
 
     Serial.println("Initializing SD card...");
@@ -159,10 +160,19 @@ void loop() {
         flightTime = (micros()-launchTime)/1000;
         altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA)-launchAlt;
         velocity = (static_cast<float>(altitude - lastAltitude) / (static_cast<float>(flightTime - lastTime))) * 1000.0f;
+        if (flightTime <= 2000 || flightTime >= 4500){
+            cappedVelocity = velocity;
+        } else {
+            if (velocity > cappedVelocity){
+                cappedVelocity = min(cappedVelocity + 5, velocity);
+            } else if (velocity < cappedVelocity){
+                cappedVelocity = max(cappedVelocity - 5, velocity);
+            }
+        }
         lastTime = flightTime;
         lastAltitude = altitude;
         isBurning = flightTime <= burnout;
-        flightData[entry].raw_projected_apogee = altitude + (mass / (2*k)) * log((k * pow(velocity, 2)) / (mass * 9.8) + 1);
+        flightData[entry].raw_projected_apogee = altitude + (mass / (2*k)) * log((k * pow(cappedVelocity, 2)) / (mass * 9.8) + 1);
 
         // update code
         meanProjectedApogee = get_projected_apogee(flightData, numEntries);
@@ -181,7 +191,7 @@ void loop() {
         myFile.print(altitude);
         myFile.print(", ");
 
-        myFile.print(velocity);
+        myFile.print(cappedVelocity);
         myFile.print(", ");
 
         myFile.print(isDeployed);
