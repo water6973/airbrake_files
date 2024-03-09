@@ -159,7 +159,16 @@ void loop() {
         // get all relevant launch variables
         flightTime = (micros()-launchTime)/1000;
         altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA)-launchAlt;
-        velocity = (static_cast<float>(altitude - lastAltitude) / (static_cast<float>(flightTime - lastTime))) * 1000.0f;
+        // velocity = (static_cast<float>(altitude - lastAltitude) / (static_cast<float>(flightTime - lastTime))) * 1000.0f; // Comment out if below debug is on
+
+        // DEBUG: CODE TO TEST VELOCITY CAPPING 
+        if (flightTime <= 3000){
+          velocity = velocity + 10;
+        } else {
+          velocity = velocity - 10;
+        }
+        //
+          
         if (flightTime <= 2000 || flightTime >= 4500){
             cappedVelocity = velocity;
         } else {
