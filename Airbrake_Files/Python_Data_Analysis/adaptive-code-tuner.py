@@ -8,13 +8,14 @@ import matplotlib.pyplot as plt
 g = 9.8  # Gravity  
 
 # Define dynamic ranges for slice lengths and k values
-slice_length_range = range(4, 6, 1) 
-k_values_range = np.arange(0.0015, 0.002, 0.00005)
+slice_length_range = range(1, 20, 1) 
+k_values_range = np.arange(0.0015, 0.003, 0.0001)
 
 # Files, their respective actual apogees, and masses
 files_apogees_masses = {
-    'C:/Users/gavin/Documents/test5.csv': {'apogee': 298, 'mass': 0.585},
-    'C:/Users/gavin/Documents/test2.csv': {'apogee': 341, 'mass': 0.580}
+    '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test5.csv': {'apogee': 298, 'mass': 0.585},
+    '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test2.csv': {'apogee': 341, 'mass': 0.580},
+    '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test11.csv': {'apogee': 266.4, 'mass': 0.606},
 }
 
 def mean_projected_apogee(row, df, slice_length, k):
@@ -24,10 +25,18 @@ def mean_projected_apogee(row, df, slice_length, k):
 
 def calculate_error_for_file(filename, details, slice_length, k):
     df = pd.read_csv(filename, names=['Time', 'Altitude'])
-    df['Altitude'] = df['Altitude']
     df['Velocity'] = (df['Altitude'].diff() / df['Time'].diff())
+    df['Adjusted Velocity'] = df['Velocity'].copy() 
+    for i in range(1, len(df)):
+        if (df.at[i, 'Time'] > 2 and df.at[i, 'Time'] < 4.5): # change these values (sets the interval of time where velocity change clamp is applied)
+            prev_velocity = df.at[i - 1, 'Adjusted Velocity']
+            current_velocity = df.at[i, 'Velocity']
+            if current_velocity > prev_velocity:
+                df.at[i, 'Adjusted Velocity'] = min(prev_velocity + 5, current_velocity) # sets velocity change clamp in the positive direction
+            elif current_velocity < prev_velocity:
+                df.at[i, 'Adjusted Velocity'] = max(prev_velocity - 5, current_velocity) # sets velocity change clamp in the negative direction
     mass = details['mass']  # Use mass specific to this file
-    df['Raw Projected Apogee'] = df['Altitude'] + (mass / (2 * k)) * np.log((k * df['Velocity'] ** 2) / (mass * g) + 1)
+    df['Raw Projected Apogee'] = df['Altitude'] + (mass / (2 * k)) * np.log((k * df['Adjusted Velocity'] ** 2) / (mass * g) + 1)
     df['Projected Apogee'] = df.apply(mean_projected_apogee, axis=1, df=df, slice_length=slice_length, k=k)
     df.loc[df['Time'] <= 1.5, 'Projected Apogee'] = np.nan  # Exclude early time values
     df.loc[df['Time'] >= 10, 'Projected Apogee'] = np.nan

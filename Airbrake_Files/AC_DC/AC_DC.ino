@@ -38,9 +38,9 @@ int entry = 0; // current entry to be updated (oldest entry)
 int meanProjectedApogee;
 
 const float mass = 0.613; // in kg, after burnout (so not including 33g of F-51 propellant)
-const float k = 0.026;
+const float k = 0.0022;
 const float g = 9.8;
-const int sliceLength = 5;
+const int sliceLength = 3;
 
 const bool debugMode = false;
 
