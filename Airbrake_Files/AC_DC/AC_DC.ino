@@ -110,6 +110,10 @@ void setup() {
 
     Serial.println("Testing data collection...");
     myFile = SD.open("data.txt", FILE_WRITE);
+    for(int i = 0, i < 5, i++){
+      flightData[i] = 0;
+    }
+    
     // if the file opened okay, write to it:
     if (myFile) {
         Serial.println("Successfully writing to data.txt! (4/4)\nInitialization successful!\n");
