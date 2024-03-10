@@ -8,7 +8,7 @@
 #define MPU6050_ACCEL_FS_16G 2
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define DEPLOYED 800
-#define UNDEPLOYED 2200
+#define UNDEPLOYED 2200`
 
 // install libraries
 #include <Wire.h>
@@ -39,6 +39,7 @@ int meanProjectedApogee;
 
 const float mass = 0.598; // in kg, after burnout (so not including 33g of F-51 propellant)
 const float k = 0.0019;
+const int accCap = 2;
 const float g = 9.8;
 const int sliceLength = 3;
 
@@ -49,6 +50,7 @@ MPU6050 mpu;
 
 int16_t ax, ay, az; // acceleration in the x, y, and z directions
 bool isDeployed = false; // air brake deployment status
+bool cappingTimer = 0;
 
 // create flight_data handler to average projected apogees
 struct FlightData {
@@ -178,15 +180,17 @@ void loop() {
         }
         */
           
-        if (flightTime <= 2000 || flightTime >= 5000){
-            cappedVelocity = velocity;
-        } else {  
+        if (cappingTimer > 0){
+            cappingTimer -= 1;
             if (velocity > cappedVelocity){
-                cappedVelocity = min(cappedVelocity + 2, velocity);
+                cappedVelocity = min(cappedVelocity + accCap, velocity);
             } else if (velocity < cappedVelocity){
-                cappedVelocity = max(cappedVelocity - 2, velocity);
+                cappedVelocity = max(cappedVelocity - accCap, velocity);
             }
+        } else {  
+            cappedVelocity = velocity;
         }
+
         lastTime = flightTime;
         lastAltitude = altitude;
         isBurning = flightTime <= burnout;
@@ -195,8 +199,16 @@ void loop() {
         // update code
         meanProjectedApogee = get_projected_apogee(flightData, numEntries);
         if (meanProjectedApogee > 250){
+            if (!isDeployed){
+                cappingTimer = 5;
+            }
             isDeployed = true;
-        } else { isDeployed = false; }
+        } else { 
+            if (isDeployed){
+                cappingTimer = 5;
+            }
+            isDeployed = false; 
+        }
 
         /* DEBUG: CODE TO TEST AIRBRAKE DEPLOYMENT
         isDeployed = true;
@@ -210,6 +222,9 @@ void loop() {
         myFile.print(", ");
 
         myFile.print(cappedVelocity);
+        myFile.print(", ");
+
+        myFile.print(cappingTimer);
         myFile.print(", ");
 
         myFile.print(isDeployed);
