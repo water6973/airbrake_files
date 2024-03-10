@@ -37,8 +37,8 @@ int numEntries = 1; // number of entries to be used in averaging projected apoge
 int entry = 0; // current entry to be updated (oldest entry)
 int meanProjectedApogee;
 
-const float mass = 0.613; // in kg, after burnout (so not including 33g of F-51 propellant)
-const float k = 0.0022;
+const float mass = 0.598; // in kg, after burnout (so not including 33g of F-51 propellant)
+const float k = 0.0016;
 const float g = 9.8;
 const int sliceLength = 3;
 
