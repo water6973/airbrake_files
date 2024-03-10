@@ -1,14 +1,3 @@
-PerfectFlite Pnut
-Firmware: 1.0
-Software: 1.16
-Serial Number: 5230
-Apogee: 698' AGL
-Ground Elevation: 567' MSL
-NumSamps: 736
-Flight Number: 10
-Comments:
-
-Data: (Time, Altitude, Velocity, Temperature (F), Voltage)
 0.00, 2, 0, 60.42, 3.80
 0.05, 2, -7, 60.42, 3.80
 0.10, 1, 3, 60.44, 3.80
