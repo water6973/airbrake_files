@@ -8,7 +8,7 @@
 #define MPU6050_ACCEL_FS_16G 2
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define DEPLOYED 800
-#define UNDEPLOYED 2200`
+#define UNDEPLOYED 2200
 
 // install libraries
 #include <Wire.h>
@@ -38,7 +38,7 @@ int entry = 0; // current entry to be updated (oldest entry)
 int meanProjectedApogee;
 
 const float mass = 0.598; // in kg, after burnout (so not including 33g of F-51 propellant)
-const float k = 0.0019;
+const float k = 0.002;
 const int accCap = 2;
 const float g = 9.8;
 const int sliceLength = 3;
@@ -50,7 +50,7 @@ MPU6050 mpu;
 
 int16_t ax, ay, az; // acceleration in the x, y, and z directions
 bool isDeployed = false; // air brake deployment status
-bool cappingTimer = 0;
+int cappingTimer = 0;
 
 // create flight_data handler to average projected apogees
 struct FlightData {
@@ -76,7 +76,7 @@ void setup() {
     Serial.println(mass, 3);
     Serial.print("K value: ");
     Serial.println(k, 4);
-    Serial.println("");
+    Serial.println("\n");
     Wire.begin();
 
     Serial.println("Initializing SD card...");
