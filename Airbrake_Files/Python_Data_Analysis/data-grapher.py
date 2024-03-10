@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 PNUT = 0
 SD = 1
 
-actual_apogee = 216  # replace with actual apogee of flight in m
+actual_apogee = 228  # replace with actual apogee of flight in m
 
 datatype = SD
-filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test12.csv'
-graph_filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Graphs/test12.png'
+filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test13.csv'
+graph_filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Graphs/test13.png'
 
 if (datatype == SD):
     df = pd.read_csv(filename, names=['Time', 'Altitude', 'Velocity', 'isDeployed', 'isBurning', 'Projected Apogee'])
