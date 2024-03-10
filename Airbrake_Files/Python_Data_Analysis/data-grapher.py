@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 PNUT = 0
 SD = 1
 
-actual_apogee = 243  # replace with actual apogee of flight in m
+actual_apogee = 222.5  # replace with actual apogee of flight in m
 
 datatype = SD
-filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test14.csv'
-graph_filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Graphs/test14.png'
+filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test15.csv'
+graph_filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Graphs/test15.png'
 
 if (datatype == SD):
-    df = pd.read_csv(filename, names=['Time', 'Altitude', 'Velocity', 'isDeployed', 'isBurning', 'Projected Apogee'])
+    df = pd.read_csv(filename, names=['Time', 'Altitude', 'Velocity', 'Capping Timer', 'isDeployed', 'isBurning', 'Projected Apogee'])
     df.loc[df['Time'] <= 1.5, 'Projected Apogee'] = np.nan
     df['Error'] = abs(actual_apogee - df['Projected Apogee'])
 
@@ -26,7 +26,7 @@ if (datatype == SD):
     deploy_changes = df[df['isDeployed'].diff() != 0]
     for time in deploy_changes['Time']:
         plt.axvline(x=time, color='k', linestyle='--', alpha=0.5)
-        
+
 elif (datatype == PNUT):
     df = pd.read_csv(filename, names=['Time', 'Altitude', 'Velocity', 'Temperature', 'Voltage'])
     plt.figure(figsize=(10, 6))
