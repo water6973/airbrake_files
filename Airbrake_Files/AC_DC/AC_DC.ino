@@ -71,9 +71,9 @@ void setup() {
     while (!Serial);
     Serial.println("Now starting: AC-DC V5.1");
     Serial.print("Mass: ");
-    Serial.println(mass);
+    Serial.println(mass, 3);
     Serial.print("K value: ");
-    Serial.println(k);
+    Serial.println(k, 4);
     Serial.println("");
     Wire.begin();
 
