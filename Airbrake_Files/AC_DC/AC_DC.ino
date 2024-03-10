@@ -69,7 +69,12 @@ File myFile;
 void setup() {
     Serial.begin(115200);
     while (!Serial);
-    Serial.println("Now starting: AC-DC V5.1\n");
+    Serial.println("Now starting: AC-DC V5.1");
+    Serial.print("Mass: ");
+    Serial.println(mass);
+    Serial.print("K value: ");
+    Serial.println(k);
+    Serial.println("");
     Wire.begin();
 
     Serial.println("Initializing SD card...");
