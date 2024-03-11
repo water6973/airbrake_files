@@ -140,7 +140,9 @@ void loop() {
     if((isLaunched && flightTime <= 20000) or debugMode){
         // get all relevant launch variables
         flightTime = (micros()-launchTime)/1000;
-        altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA)-launchAlt;
+        if ((flightTime <= 2000 || flightTime >= 6000) || altitude > lastAltitude){
+            altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA)-launchAlt;
+        }
         velocity = (static_cast<float>(altitude - lastAltitude) / (static_cast<float>(flightTime - lastTime))) * 1000.0f; // Comment out if below debug is on
         /* DEBUG: CODE TO TEST VELOCITY CAPPING 
         if (flightTime <= 3000){
@@ -150,22 +152,19 @@ void loop() {
         }
         */
 
-        if (flightTime <= 2000 || flightTime >= 5000){
+        if (flightTime <= 2000 || flightTime >= 6000){
             cappedVelocity = velocity;
-        } else {  
-            if (velocity > cappedVelocity){
-                cappedVelocity = min(cappedVelocity + 2, velocity);
-            } else if (velocity < cappedVelocity){
-                cappedVelocity = max(cappedVelocity - 2, velocity);
-            }
+        } else if (velocity < cappedVelocity){ 
+            cappedVelocity = max(cappedVelocity - 1, velocity);
         }
+
         lastTime = flightTime;
         lastAltitude = altitude;
         isBurning = flightTime <= burnout;
         flightData[entry].raw_projected_apogee = altitude + (mass / (2*k)) * log((k * pow(cappedVelocity, 2)) / (mass * 9.8) + 1);
         // update code
         meanProjectedApogee = get_projected_apogee(flightData, numEntries);
-        if (meanProjectedApogee > 250){
+        if (meanProjectedApogee > 250 && flightTime >= 2000 && flightTime < 10000){
             isDeployed = true;
         } else { isDeployed = false; }
         /* DEBUG: CODE TO TEST AIRBRAKE DEPLOYMENT
