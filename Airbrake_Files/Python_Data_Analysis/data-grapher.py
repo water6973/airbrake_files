@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 PNUT = 0
 SD = 1
 
-actual_apogee = 215.8  # replace with actual apogee of flight in m
+actual_apogee = 231  # replace with actual apogee of flight in m
 target_apogee = 250
 
 datatype = SD
-filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test12.csv'
-graph_filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Graphs/test12.png'
+filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Clean_Data/test24.csv'
+graph_filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Flight_Data/Graphs/test24.png'
 
 if datatype == SD:
     df = pd.read_csv(filename, names=['Time', 'Altitude', 'Velocity', 'isDeployed', 'isBurning', 'Projected Apogee'])
@@ -54,7 +54,7 @@ elif datatype == PNUT:
     plt.axvline(x=1.5, color='r', linestyle='--', label='Motor Cutoff (1.5s)')
 
 plt.ylim(0, 400)
-plt.xlim(0, 10000)
+plt.xlim(0, 15000)
 
 plt.xlabel('Time (Milliseconds)')
 plt.ylabel('Altitude (Meters)')
