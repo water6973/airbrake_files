@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 PNUT = 0
 SD = 1
 
-actual_apogee = 231  # replace with actual apogee of flight in m
 target_apogee = 250
 
 datatype = SD
@@ -14,6 +13,7 @@ graph_filename = '/home/gavin/Documents/GitHub/airbrake_files/Airbrake_Files/Fli
 
 if datatype == SD:
     df = pd.read_csv(filename, names=['Time', 'Altitude', 'Velocity', 'isDeployed', 'isBurning', 'Projected Apogee'])
+    actual_apogee = df['Altitude'].max()
     df.loc[df['Time'] <= 1.5, 'Projected Apogee'] = np.nan
     df['Error'] = abs(actual_apogee - df['Projected Apogee'])
 
@@ -48,6 +48,7 @@ if datatype == SD:
 
 elif datatype == PNUT:
     df = pd.read_csv(filename, names=['Time', 'Altitude', 'Velocity', 'Temperature', 'Voltage'])
+    actual_apogee = df['Altitude'].max()
     plt.figure(figsize=(10, 6))
     plt.plot(df['Time'], df['Altitude'], label='Altitude')
     plt.plot(df['Time'], df['Velocity'], label='Velocity')
