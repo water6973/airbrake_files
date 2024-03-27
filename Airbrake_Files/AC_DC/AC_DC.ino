@@ -32,7 +32,7 @@ int entry = 0; // current entry to be updated (oldest entry)
 int meanProjectedApogee;
 
 const float mass = 0.598; // in kg, after burnout (so not including 33g of F-51 propellant)
-const float k = 0.002;
+const float k = 0.00205;
 const float g = 9.8;
 const int sliceLength = 3;
 
@@ -57,11 +57,11 @@ File myFile;
 void setup() {
     Serial.begin(115200);
     while (!Serial);
-    Serial.println("Now starting: AC-DC V5.1");
+    Serial.println("Now starting: AC-DC V6");
     Serial.print("Mass: ");
     Serial.println(mass, 3);
     Serial.print("K value: ");
-    Serial.println(k, 4);
+    Serial.println(k, 5);
     Serial.println("");
     Wire.begin();
     Serial.println("Initializing SD card...");
@@ -155,7 +155,7 @@ void loop() {
         if (flightTime <= 2000 || flightTime >= 6000){
             cappedVelocity = velocity;
         } else if (velocity < cappedVelocity){ 
-            cappedVelocity = max(cappedVelocity - 1, velocity);
+            cappedVelocity = max(cappedVelocity - 1.5, velocity);
         }
 
         lastTime = flightTime;
@@ -170,6 +170,7 @@ void loop() {
         /* DEBUG: CODE TO TEST AIRBRAKE DEPLOYMENT
         isDeployed = true;
         */
+      
         // record out relevant launch variables to the data file (data.txt)
         myFile.print(flightTime);
         myFile.print(", ");
