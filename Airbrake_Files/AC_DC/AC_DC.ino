@@ -31,8 +31,8 @@ int numEntries = 1; // number of entries to be used in averaging projected apoge
 int entry = 0; // current entry to be updated (oldest entry)
 int meanProjectedApogee;
 
-const float mass = 0.598; // in kg, after burnout (so not including 33g of F-51 propellant)
-const float k = 0.00205;
+const float mass = 0.587; // in kg, after burnout (so not including 33g of F-51 propellant)
+const float k = 0.0023;
 const float g = 9.8;
 const int sliceLength = 3;
 
@@ -167,10 +167,9 @@ void loop() {
         if (meanProjectedApogee > 250 && flightTime >= 2000 && flightTime < 10000){
             isDeployed = true;
         } else { isDeployed = false; }
-        /* DEBUG: CODE TO TEST AIRBRAKE DEPLOYMENT
+        // DEBUG: CODE TO TEST AIRBRAKE DEPLOYMENT
         isDeployed = true;
-        */
-      
+        //
         // record out relevant launch variables to the data file (data.txt)
         myFile.print(flightTime);
         myFile.print(", ");
@@ -204,6 +203,7 @@ void loop() {
     if (flightTime >= 2000 && flightTime < 10000){
       if (isDeployed){
         // deploy air brakes if adaptive code says they should be deployed
+        Serial.print("Deploying...");
         digitalWrite(9,HIGH);
         delayMicroseconds(DEPLOYED);
         digitalWrite(9,LOW);
