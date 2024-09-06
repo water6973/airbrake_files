@@ -28,7 +28,7 @@ def calculate_error_for_file(filename, details, slice_length, k):
     df['Velocity'] = (df['Altitude'].diff() / df['Time'].diff())
     df['Adjusted Velocity'] = df['Velocity'].copy() 
     for i in range(1, len(df)):
-        if (df.at[i, 'Time'] > 2 and df.at[i, 'Time'] < 4.5): # change these values (sets the interval of time where velocity change clamp is applied)
+        if (df.at[i, 'Time'] > 2 and df.at[i, 'Time'] < 6): # change these values (sets the interval of time where velocity change clamp is applied)
             prev_velocity = df.at[i - 1, 'Adjusted Velocity']
             current_velocity = df.at[i, 'Velocity']
             if current_velocity > prev_velocity:
