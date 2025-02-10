@@ -1,0 +1,49 @@
+#This code works for a pi when uploaded via SSH or terminal onbaord the comuter. It will export the timestamp and tempature every second to a file stored onboard the SD card. 
+#It assumes the use of a DS18B20 heat sensor but different packages can be uploaded for different sensor models. 
+
+#Run Commands from terminal or SSH remotley
+
+#  sudo apt install python3-pip -y
+#  pip3 install w1thermsensor
+
+#Open a text editor in the shell by using : nano log_temp.py
+
+
+
+#Now copy and paste the code into it.
+
+
+
+from w1thermsensor import W1ThermSensor
+import time
+
+sensor = W1ThermSensor()
+
+with open("temperature_log.csv", "a") as file:
+    file.write("Timestamp,Temperature (°C)\n")
+
+while True:
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    temperature = sensor.get_temperature()
+
+    print(f"{timestamp} - Temperature: {temperature:.2f}°C")
+
+    with open("temperature_log.csv", "a") as file:
+        file.write(f"{timestamp},{temperature:.2f}\n")
+
+    time.sleep(1)
+
+
+
+#save by doing CTR X, y, and enter, not all at the same time.
+
+
+
+
+#To make run on startup
+
+# crontab -e
+
+#Add this line at bottom : @reboot python3 /home/pi/log_temp.py &
+
+# Easy
